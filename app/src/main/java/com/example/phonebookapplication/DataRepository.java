@@ -3,6 +3,7 @@ package com.example.phonebookapplication;
 import android.app.Application;
 import android.content.res.AssetManager;
 import android.os.Handler;
+import android.os.HandlerThread;
 
 import androidx.lifecycle.MutableLiveData;
 
@@ -60,14 +61,20 @@ public class DataRepository {
     }
 
     private void loadContacts(Application application) {
-        Handler handler = new Handler();
+
+        HandlerThread handlerThread = new HandlerThread("HandlerThreadName");
+
+        handlerThread.start();
+
+        Handler handler = new Handler(handlerThread.getLooper());
+
         handler.post(() -> {
             String jsonContacts = readJson(application.getAssets());
             Gson gson = new Gson();
             Type contactListType = new TypeToken<List<Contact>>() {}.getType();
 
             List<Contact> contacts = gson.fromJson(jsonContacts, contactListType);
-            mContactList.setValue(contacts);
+            mContactList.postValue(contacts);
         });
     }
 
